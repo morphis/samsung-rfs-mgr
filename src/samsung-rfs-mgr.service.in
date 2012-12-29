@@ -1,0 +1,9 @@
+[Unit]
+Description=Samsung RFS Management daemon
+After=syslog.target
+
+[Service]
+ExecStart=@prefix@/sbin/samsung-rfs-mgr -n
+
+[Install]
+WantedBy=multi-user.target

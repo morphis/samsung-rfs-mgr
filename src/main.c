@@ -141,7 +141,7 @@ static GOptionEntry options[] = {
 static void debug_handler(const gchar *log_domain, GLogLevelFlags log_level,
 						const gchar *message, gpointer user_data)
 {
-	g_print("DEBUG: %s\n", message);
+	g_message("%s\n", message);
 }
 
 int main(int argc, char **argv)

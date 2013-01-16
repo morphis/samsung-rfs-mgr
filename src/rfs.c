@@ -39,6 +39,7 @@ static gboolean received_data(GIOChannel *channel, GIOCondition cond,
 {
 	struct rfs_manager *mgr = user_data;
 	struct ipc_message_info resp;
+	struct ipc_message_info *resp_ptr;
 	int ret;
 
 	if (cond & G_IO_NVAL)
@@ -46,17 +47,20 @@ static gboolean received_data(GIOChannel *channel, GIOCondition cond,
 
 	ret = ipc_client_recv(mgr->client, &resp);
 	if (ret < 0) {
-		g_error("Could not receive IPC message from modem");
+		g_warning("Could not receive IPC message from modem");
 		return FALSE;
 	}
 
-	switch (resp.cmd) {
+	g_message("Received RFS message cmd=%i", resp.cmd);
+
+	resp_ptr = &resp;
+	switch (IPC_COMMAND(resp_ptr)) {
 	case IPC_RFS_NV_READ_ITEM:
-		g_debug("Received IPC_RFS_NV_READ_ITEM request");
+		g_message("Received IPC_RFS_NV_READ_ITEM request");
 		ipc_rfs_send_io_confirm_for_nv_read_item(mgr->client, &resp);
 		break;
 	case IPC_RFS_NV_WRITE_ITEM:
-		g_debug("Received IPC_RFS_NV_WRITE_ITEM request");
+		g_message("Received IPC_RFS_NV_WRITE_ITEM request");
 		ipc_rfs_send_io_confirm_for_nv_write_item(mgr->client, &resp);
 		break;
 	}
@@ -88,7 +92,7 @@ struct rfs_manager* rfs_manager_new(void)
 
 static void log_handler(const char *message, void *user_data)
 {
-	g_debug("%s", message);
+	g_message("%s", message);
 }
 
 int rfs_manager_start(struct rfs_manager *mgr)
@@ -98,7 +102,7 @@ int rfs_manager_start(struct rfs_manager *mgr)
 	if (!mgr)
 		return -1;
 
-	g_debug("Starting up RFS manager ...");
+	g_message("Starting up RFS manager ...");
 
 	ipc_client_create_handlers_common_data(mgr->client);
 	ipc_client_open(mgr->client);
@@ -136,7 +140,7 @@ int rfs_manager_stop(struct rfs_manager *mgr)
 	if (!mgr)
 		return -1;
 
-	g_debug("Stopping RFS manager ...");
+	g_message("Stopping RFS manager ...");
 
 	if (mgr->read_watch > 0)
 		g_source_remove(mgr->read_watch);
